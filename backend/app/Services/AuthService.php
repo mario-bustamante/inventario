@@ -73,7 +73,7 @@ class AuthService
             'user'         => new UserResource($user),
             'access_token' => $token,
             'token_type'   => 'Bearer',
-            'expires_in'   => auth()->factory()->getTTL() * 60,
+            'expires_in'   => auth()->factory()->getTTL(),
         ];
     }
 }
