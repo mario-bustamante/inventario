@@ -3,80 +3,58 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\RegisterRequest;
+use App\Http\Resources\UserResource;
+use App\Services\AuthService;
+use Illuminate\Http\JsonResponse;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class AuthController extends Controller
 {
+    public function __construct(private AuthService $authService) {}
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validator = Validator::make(
-            $request->all(), [
-                "name" => "required",
-                "email" => "required|email|unique:users",
-                'password' => 'required|min:8'
-            ]
-        );
+        $result = $this->authService->register($request->validated());
 
-        if($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+        return response()->json($result, 201);
+    }
+
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $result = $this->authService->login($request->validated());
+
+        if (!$result) {
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
 
-        $user = User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>Hash::make($request->password)
-        ]);
-
-        $token = auth()->login($user);
-
-        return response()->json([
-            'message' => 'Usuario registrado correctamente',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], 201);
+        return response()->json($result);
     }
 
-    public function login(Request $request)
+    public function me(): JsonResponse
     {
-        $credentials = $request->only(['email', 'password']);
+        return response()->json(new UserResource(auth()->user()));
+    }
 
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json([
-                'message'=>'Credenciales incorrectas'
-            ],401);
+    public function refresh(): JsonResponse
+    {
+        try {
+            $result = $this->authService->refresh();
+        } catch (TokenInvalidException) {
+            return response()->json(['message' => 'Token inválido'], 401);
+        } catch (JWTException) {
+            return response()->json(['message' => 'No se pudo refrescar el token'], 500);
         }
 
-        return response()->json([
-            'access_token'=>$token,
-            'token_type'=>'Bearer',
-            'expires_in'=>auth()->factory()->getTTL()*60
-        ]);
+        return response()->json($result);
     }
 
-    public function me()
+    public function logout(): JsonResponse
     {
-        return response()->json(auth()->user());
-    }
+        $this->authService->logout();
 
-    public function refresh()
-    {
-        return response()->json([
-            'access_token' => auth()->refresh(),
-            'token_type'   => 'Bearer',
-            'expires_in'   => auth()->factory()->getTTL() * 60,
-        ]);
-    }
-
-    public function logout()
-    {
-        auth()->logout();
-
-        return response()->json([
-            'message'=>'Logout correcto'
-        ]);
+        return response()->json(['message' => 'Logout correcto']);
     }
 }
