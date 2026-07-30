@@ -1,5 +1,3 @@
-import { canNavigate } from '@layouts/plugins/casl'
-
 export const setupGuards = router => {
   // 👉 router.beforeEach
   // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
@@ -28,7 +26,7 @@ export const setupGuards = router => {
       else
         return undefined
     }
-    if (!canNavigate(to) && to.matched.length) {
+    if (!isLoggedIn && to.matched.length) {
       /* eslint-disable indent */
             return isLoggedIn
                 ? { name: 'not-authorized' }

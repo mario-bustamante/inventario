@@ -1,5 +1,6 @@
 import { createFetch } from '@vueuse/core'
 import { destr } from 'destr'
+import { handleUnauthorized } from '@/utils/auth-session'
 
 export const useApi = createFetch({
   baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -34,6 +35,12 @@ export const useApi = createFetch({
       }
       
       return { data: parsedData, response }
+    },
+    onFetchError(ctx) {
+      if (ctx.response?.status === 401)
+        handleUnauthorized(ctx.response?.url || '')
+
+      return ctx
     },
   },
 })

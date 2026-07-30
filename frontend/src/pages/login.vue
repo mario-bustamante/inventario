@@ -1,5 +1,6 @@
 <script setup>
 import { useGenerateImageVariant } from '@/@core/composable/useGenerateImageVariant'
+import { $api } from '@/utils/api'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
@@ -16,7 +17,57 @@ const form = ref({
   remember: false,
 })
 
-definePage({ meta: { layout: 'blank' } })
+const router = useRouter()
+const route = useRoute()
+const isSubmitting = ref(false)
+const loginError = ref('')
+
+const login = async() => {
+  loginError.value = ''
+  isSubmitting.value = true
+
+  try {
+    const resp = await $api('/login', {
+      method: 'POST',
+      body: {
+        email: form.value.email,
+        password: form.value.password,
+      },
+    })
+
+    if (!resp?.access_token || !resp?.user)
+      throw new Error('Respuesta de autenticacion incompleta')
+
+    const maxAge = Number(resp.expires_in) > 0 ? Number(resp.expires_in) * 60 : undefined
+
+    const accessToken = useCookie('accessToken', { maxAge, sameSite: 'lax' })
+    const userData = useCookie('userData', { maxAge, sameSite: 'lax' })
+    const tokenType = useCookie('tokenType', { maxAge, sameSite: 'lax' })
+    const tokenExpiresIn = useCookie('tokenExpiresIn', { maxAge, sameSite: 'lax' })
+
+    accessToken.value = resp.access_token
+    userData.value = resp.user
+    tokenType.value = resp.token_type || 'Bearer'
+    tokenExpiresIn.value = resp.expires_in
+
+    const redirectTarget = typeof route.query.to === 'string' && route.query.to.length
+      ? route.query.to
+      : '/dashboard'
+
+    await router.replace(redirectTarget)
+  } catch (error) {
+    loginError.value = error?.data?.message || error?.message || 'No se pudo iniciar sesion'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+definePage({
+  meta: {
+    layout: 'blank',
+    unauthenticatedOnly: true,
+  },
+})
 
 const isPasswordVisible = ref(false)
 const authV2LoginMask = useGenerateImageVariant(authV2LoginMaskLight, authV2LoginMaskDark)
@@ -76,7 +127,16 @@ const authV2LoginIllustration = useGenerateImageVariant(authV2LoginIllustrationL
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="login">
+            <VAlert
+              v-if="loginError"
+              type="error"
+              variant="tonal"
+              class="mb-4"
+            >
+              {{ loginError }}
+            </VAlert>
+
             <VRow>
               <!-- email -->
               <VCol cols="12">
@@ -99,6 +159,7 @@ const authV2LoginIllustration = useGenerateImageVariant(authV2LoginIllustrationL
                   :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 />
+ 
 
                 <!-- remember me checkbox -->
                 <div class="d-flex align-center justify-space-between flex-wrap my-6 gap-x-2">
@@ -119,6 +180,8 @@ const authV2LoginIllustration = useGenerateImageVariant(authV2LoginIllustrationL
                 <VBtn
                   block
                   type="submit"
+                  :loading="isSubmitting"
+                  :disabled="isSubmitting"
                 >
                   Login
                 </VBtn>

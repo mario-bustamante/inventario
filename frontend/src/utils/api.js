@@ -1,4 +1,5 @@
 import { ofetch } from 'ofetch'
+import { handleUnauthorized } from '@/utils/auth-session'
 
 export const $api = ofetch.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -10,5 +11,9 @@ export const $api = ofetch.create({
         Authorization: `Bearer ${accessToken}`,
       }
     }
+  },
+  async onResponseError({ request, response }) {
+    if (response?.status === 401)
+      handleUnauthorized(request)
   },
 })

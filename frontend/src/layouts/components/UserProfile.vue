@@ -1,6 +1,26 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import { $api } from '@/utils/api'
+import { clearAuthSession } from '@/utils/auth-session'
 import avatar1 from '@images/avatars/avatar-1.png'
+
+const router = useRouter()
+
+const accessToken = useCookie('accessToken')
+const userData = useCookie('userData')
+
+const logout = async () => {
+  try {
+    if (accessToken.value)
+      await $api('/logout', { method: 'POST' })
+  } catch {
+    // Ignore API errors and continue with local session cleanup.
+  } finally {
+    clearAuthSession()
+
+    await router.replace('/login')
+  }
+}
 
 const userProfileList = [
   { type: 'divider' },
@@ -126,7 +146,7 @@ const userProfileList = [
                 color="error"
                 size="small"
                 append-icon="ri-logout-box-r-line"
-                :to="{ name: 'login' }"
+                @click="logout"
               >
                 Logout
               </VBtn>
