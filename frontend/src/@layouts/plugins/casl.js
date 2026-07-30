@@ -36,6 +36,14 @@ export const canViewNavMenuGroup = item => {
 }
 export const canNavigate = to => {
   const ability = useAbility()
-    
-  return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+
+  return to.matched.some(route => {
+    const action = route.meta?.action
+    const subject = route.meta?.subject
+
+    if (!action || !subject)
+      return true
+
+    return ability.can(action, subject)
+  })
 }
