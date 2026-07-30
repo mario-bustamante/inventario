@@ -21,9 +21,14 @@ const router = useRouter()
 const route = useRoute()
 const isSubmitting = ref(false)
 const loginError = ref('')
+const sessionInfo = ref('')
+
+if (route.query.reason === 'session-expired')
+  sessionInfo.value = 'Tu sesion expiro. Inicia sesion nuevamente.'
 
 const login = async() => {
   loginError.value = ''
+  sessionInfo.value = ''
   isSubmitting.value = true
 
   try {
@@ -35,17 +40,15 @@ const login = async() => {
       },
     })
 
-    if (!resp?.access_token || !resp?.user)
+    if (!resp?.user)
       throw new Error('Respuesta de autenticacion incompleta')
 
     const maxAge = Number(resp.expires_in) > 0 ? Number(resp.expires_in) * 60 : undefined
 
-    const accessToken = useCookie('accessToken', { maxAge, sameSite: 'lax' })
     const userData = useCookie('userData', { maxAge, sameSite: 'lax' })
     const tokenType = useCookie('tokenType', { maxAge, sameSite: 'lax' })
     const tokenExpiresIn = useCookie('tokenExpiresIn', { maxAge, sameSite: 'lax' })
 
-    accessToken.value = resp.access_token
     userData.value = resp.user
     tokenType.value = resp.token_type || 'Bearer'
     tokenExpiresIn.value = resp.expires_in
@@ -128,6 +131,15 @@ const authV2LoginIllustration = useGenerateImageVariant(authV2LoginIllustrationL
 
         <VCardText>
           <VForm @submit.prevent="login">
+            <VAlert
+              v-if="sessionInfo"
+              type="warning"
+              variant="tonal"
+              class="mb-4"
+            >
+              {{ sessionInfo }}
+            </VAlert>
+
             <VAlert
               v-if="loginError"
               type="error"

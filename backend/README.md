@@ -52,35 +52,42 @@ Las rutas protegidas tienen un límite de 60 peticiones por minuto.
 
 #### 2. Rotación y Revocación de Tokens JWT
 
-Al hacer `refresh`, el token anterior queda **inmediatamente invalidado** (añadido a la blacklist). Se emite un token nuevo.
+Al hacer `refresh`, el token anterior queda **inmediatamente invalidado** (blacklist) y se emite uno nuevo.
 
 ```php
-// AuthService.php
+// app/Services/AuthService.php
 $newToken = auth()->refresh(true, true);
-// forceForever=true → blacklist permanente del token anterior
-// resetClaims=true  → nuevas claims en el token emitido
+// forceForever=true -> blacklist permanente del token anterior
+// resetClaims=true  -> nuevas claims en el token emitido
 ```
 
-Al hacer `logout`, el token actual también es revocado:
+Al hacer `logout`, el token actual también se revoca:
 
 ```php
-auth()->logout(true); // true = forzar blacklist permanente
+auth()->logout(true); // true = invalidación permanente en blacklist
 ```
 
-> Requiere `JWT_BLACKLIST_ENABLED=true` en `.env` (valor por defecto).
+Además, `logout` es tolerante a token ya expirado/inválido para garantizar limpieza de sesión en cliente.
+
+> Requiere `JWT_BLACKLIST_ENABLED=true`.
 
 ---
 
-#### 3. CORS Restrictivo
+#### 3. CORS con credenciales y origen restringido
 
-Solo se permite el origen definido en `FRONTEND_URL`. Ningún otro dominio puede hacer peticiones a la API.
+Solo se permite el origen definido en `FRONTEND_URL` y se habilita envío de credenciales para cookies HttpOnly.
 
 ```php
 // config/cors.php
-'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:5173')],
+'allowed_origins' => [rtrim(env('FRONTEND_URL'), '/')],
 'allowed_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
 'paths'           => ['api/*'],
+'supports_credentials' => true,
 ```
+
+Notas:
+- Se normaliza `FRONTEND_URL` con `rtrim(..., '/')` para evitar fallos por slash final.
+- En frontend se debe usar `credentials: 'include'`.
 
 ---
 
@@ -99,21 +106,43 @@ La validación ocurre antes de llegar al controlador. Si falla, se devuelve `422
 
 ---
 
-#### 5. Rutas protegidas bajo `auth:api`
+#### 5. JWT en cookie HttpOnly (sin exponer token a JavaScript)
 
-`/me`, `/refresh` y `/logout` requieren un token JWT válido. Sin token o con token expirado/revocado se devuelve `401 Unauthorized`.
+Se migró el flujo para reducir riesgo ante XSS:
+- `login`, `register` y `refresh` emiten la cookie `access_token` como **HttpOnly**.
+- El token ya no se devuelve en el JSON público como `access_token`.
+- `logout` elimina la cookie con `Cookie::forget('access_token', ...)`.
+
+Implementación principal:
+- `app/Http/Controllers/Api/AuthController.php`
+- `app/Http/Middleware/UseJwtFromCookie.php`
+
+`UseJwtFromCookie` toma `access_token` desde cookie y la convierte en header `Authorization: Bearer ...` internamente para compatibilidad con `auth:api`.
+
+Esto permite que el frontend no lea JWT ni lo decodifique localmente.
+
+#### 6. Rutas de autenticación y protección
+
+`/me` y `/logout` requieren `auth:api`.
+
+`/refresh` quedó público por diseño controlado para permitir rotación cuando el access token está vencido, usando la cookie JWT enviada por el navegador. Si el token es inválido/revocado, responde `401`.
 
 ```php
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/refresh',  [AuthController::class, 'refresh']);
+});
+
 Route::middleware(['auth:api', 'throttle:60,1'])->group(function () {
     Route::get('/me',       [AuthController::class, 'me']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::post('/logout',  [AuthController::class, 'logout']);
 });
 ```
 
 ---
 
-#### 6. Hashing de contraseñas
+#### 7. Hashing de contraseñas
 
 Las contraseñas se almacenan con `Hash::make()` (bcrypt, coste 12 por defecto en Laravel). Nunca se almacenan en texto plano.
 
@@ -127,6 +156,25 @@ JWT_TTL=15           # Expiración del access token en minutos
 JWT_REFRESH_TTL=20160  # Ventana de refresco (14 días)
 JWT_BLACKLIST_ENABLED=true
 FRONTEND_URL=https://tu-dominio-frontend.com
+
+# Cookies JWT (HttpOnly)
+AUTH_COOKIE_DOMAIN=       # Dominio de la cookie (vacío = host actual)
+AUTH_COOKIE_SECURE=true   # true: solo envía cookie por HTTPS
+AUTH_COOKIE_SAME_SITE=none # none/lax/strict. 'none' requiere AUTH_COOKIE_SECURE=true
+```
+
+Recomendación local:
+
+```env
+AUTH_COOKIE_SECURE=false   # En localhost sin HTTPS
+AUTH_COOKIE_SAME_SITE=lax  # Permite flujo normal en mismo sitio/origen cercano
+```
+
+Recomendación producción (HTTPS obligatorio):
+
+```env
+AUTH_COOKIE_SECURE=true    # Obligatorio en producción con HTTPS
+AUTH_COOKIE_SAME_SITE=none # Necesario si frontend y API operan en orígenes distintos
 ```
 
 ---
@@ -137,9 +185,25 @@ FRONTEND_URL=https://tu-dominio-frontend.com
 |---|---|---|---|
 | `POST` | `/api/login` | `throttle:5,1` | Autenticar usuario |
 | `POST` | `/api/register` | `throttle:5,1` | Registrar usuario |
+| `POST` | `/api/refresh` | `throttle:5,1` | Rotar token JWT y renovar cookie HttpOnly |
 | `GET` | `/api/me` | `auth:api` | Usuario autenticado |
-| `POST` | `/api/refresh` | `auth:api` | Rotar token |
-| `POST` | `/api/logout` | `auth:api` | Revocar token |
+| `POST` | `/api/logout` | `auth:api` | Revocar token y eliminar cookie |
+
+---
+
+### Respuesta pública de auth
+
+La respuesta de `login/register/refresh` entrega información de sesión y usuario, pero **no** expone `access_token` en el cuerpo JSON.
+
+```json
+{
+    "user": { "id": 1, "name": "...", "email": "..." },
+    "token_type": "Bearer",
+    "expires_in": 15
+}
+```
+
+El JWT viaja en la cookie HttpOnly `access_token`.
 
 ---
 

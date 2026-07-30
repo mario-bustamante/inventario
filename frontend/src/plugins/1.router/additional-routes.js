@@ -8,10 +8,9 @@ export const redirects = [
     redirect: to => {
       // TODO: Get type from backend
       const userData = useCookie('userData')
-      const accessToken = useCookie('accessToken')
       const userRole = userData.value?.role
 
-      if (userData.value && accessToken.value) {
+      if (userData.value) {
         if (userRole === 'admin')
           return { name: 'dashboards-crm' }
         if (userRole === 'client')

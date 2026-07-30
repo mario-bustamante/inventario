@@ -6,13 +6,11 @@ import avatar1 from '@images/avatars/avatar-1.png'
 
 const router = useRouter()
 
-const accessToken = useCookie('accessToken')
 const userData = useCookie('userData')
 
 const logout = async () => {
   try {
-    if (accessToken.value)
-      await $api('/logout', { method: 'POST' })
+    await $api('/logout', { method: 'POST' })
   } catch {
     // Ignore API errors and continue with local session cleanup.
   } finally {

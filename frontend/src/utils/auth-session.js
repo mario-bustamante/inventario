@@ -21,5 +21,5 @@ export const handleUnauthorized = request => {
   clearAuthSession()
 
   if (window.location.pathname !== '/login')
-    window.location.replace('/login')
+    window.location.replace('/login?reason=session-expired')
 }
