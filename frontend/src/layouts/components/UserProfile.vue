@@ -10,7 +10,7 @@ const userData = useCookie('userData')
 
 const logout = async () => {
   try {
-    await $api('/logout', { method: 'POST' })
+    await $api('/auth/logout', { method: 'POST' })
   } catch {
     // Ignore API errors and continue with local session cleanup.
   } finally {

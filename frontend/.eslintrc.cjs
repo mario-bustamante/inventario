@@ -103,22 +103,21 @@ module.exports = {
     }],
 
     // For omitting extension for ts files
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
-    ],
+    'import/extensions': 'off',
 
     // ignore virtual files
     'import/no-unresolved': [2, {
       ignore: [
         '~pages$',
         'virtual:generated-layouts',
+        '^@themeConfig$',
+        '^@/',
+        '^@layouts/',
+        '^@core/',
+        '^@images/',
+        '^@styles/',
+        '^@db/',
+        '^@api-utils/',
 
         // Ignore vite's ?raw imports
         '.*\?raw',

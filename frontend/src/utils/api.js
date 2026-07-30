@@ -2,9 +2,9 @@ import { ofetch } from 'ofetch'
 import { handleUnauthorized } from '@/utils/auth-session'
 
 const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '/api'
-const refreshRoute = /\/refresh(?:\?|$)/
-const logoutRoute = /\/logout(?:\?|$)/
-const publicAuthRoutes = /\/(login|register)(?:\?|$)/
+const refreshRoute = /\/auth\/refresh(?:\?|$)/
+const logoutRoute = /\/auth\/logout(?:\?|$)/
+const publicAuthRoutes = /\/auth\/(login|register)(?:\?|$)/
 
 const apiClient = ofetch.create({
   baseURL: apiBaseURL,
@@ -36,7 +36,7 @@ const shouldHandleUnauthorized = requestUrl => {
 
 const refreshAccessToken = async () => {
   if (!refreshPromise) {
-    refreshPromise = apiClient('/refresh', { method: 'POST' })
+    refreshPromise = apiClient('/auth/refresh', { method: 'POST' })
       .finally(() => {
         refreshPromise = null
       })

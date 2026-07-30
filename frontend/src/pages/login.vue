@@ -32,7 +32,7 @@ const login = async() => {
   isSubmitting.value = true
 
   try {
-    const resp = await $api('/login', {
+    const resp = await $api('/auth/login', {
       method: 'POST',
       body: {
         email: form.value.email,
