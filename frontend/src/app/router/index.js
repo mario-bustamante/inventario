@@ -9,6 +9,11 @@ import LoginView
 import RegisterView
     from '@/presentation/views/auth/RegisterView.vue'
 
+import AuthenticatedLayout
+    from '@/presentation/components/layouts/AuthenticatedLayout.vue'
+
+import api from '@/shared/http/api'
+
 const router = createRouter({
 
     history: createWebHistory(),
@@ -16,9 +21,20 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            name: 'home',
-            component: () =>
-                import('@/presentation/views/DashboardView.vue')
+            component: AuthenticatedLayout,
+            meta: { requiresAuth: true },
+            children: [
+                {
+                    path: '',
+                    redirect: { name: 'dashboard' }
+                },
+                {
+                    path: 'dashboard',
+                    name: 'dashboard',
+                    component: () =>
+                        import('@/presentation/views/DashboardView.vue')
+                }
+            ]
         },
         {
             path: '/login',
@@ -32,14 +48,26 @@ const router = createRouter({
             component: RegisterView
         },
 
-        {
-            path: '/dashboard',
-            name: 'dashboard',
-            component: () =>
-                import('@/presentation/views/DashboardView.vue')
-        }
-
     ]
+})
+
+router.beforeEach(async to => {
+
+    if (!to.matched.some(route => route.meta.requiresAuth)) {
+        return true
+    }
+
+    try {
+        await api.get('/auth/me')
+
+        return true
+
+    } catch {
+        return {
+            name: 'login',
+            query: { redirect: to.fullPath }
+        }
+    }
 })
 
 export default router

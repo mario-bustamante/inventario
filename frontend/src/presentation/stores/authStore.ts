@@ -75,12 +75,30 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function logout() {
+
+        loading.value = true
+        error.value = null
+
+        try {
+
+            await repository.logout()
+
+        } finally {
+
+            user.value = null
+            accessToken.value = null
+            loading.value = false
+        }
+    }
+
     return {
         user,
         accessToken,
         loading,
         error,
         login,
-        register
+        register,
+        logout
     }
 })

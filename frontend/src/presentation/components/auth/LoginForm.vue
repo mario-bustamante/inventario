@@ -49,31 +49,21 @@ async function submit() {
 
 <template>
 
-    <form
-        class="flex flex-column gap-4"
-        @submit.prevent="submit"
-    >
-
-        <div class="flex flex-column gap-2">
-
-            <label for="email">
-                Email
-            </label>
+    <form class="auth-form" @submit.prevent="submit">
+        <div class="auth-field">
+            <label for="email">Correo electrónico</label>
 
             <InputText
                 id="email"
                 v-model="email"
                 type="email"
                 autocomplete="email"
+                placeholder="nombre@empresa.com"
             />
-
         </div>
 
-        <div class="flex flex-column gap-2">
-
-            <label for="password">
-                Contraseña
-            </label>
+        <div class="auth-field">
+            <label for="password">Contraseña</label>
 
             <Password
                 id="password"
@@ -82,7 +72,6 @@ async function submit() {
                 toggleMask
                 autocomplete="current-password"
             />
-
         </div>
 
         <Message
@@ -96,8 +85,8 @@ async function submit() {
             type="submit"
             label="Iniciar sesión"
             :loading="authStore.loading"
+            class="auth-submit"
         />
-
     </form>
 
 </template>

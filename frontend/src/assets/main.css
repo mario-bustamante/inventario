@@ -1,0 +1,181 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+}
+
+body {
+  margin: 0;
+}
+
+#app {
+  width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.auth-page {
+	align-items: center;
+	background:
+		linear-gradient(120deg, rgb(10 93 89 / 13%), transparent 45%),
+		radial-gradient(circle at 85% 18%, rgb(240 184 80 / 19%), transparent 27%),
+		#f5f7f5;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 2rem 1rem;
+}
+
+.auth-panel {
+	animation: auth-enter 420ms ease-out both;
+	background: #fff;
+	border: 1px solid #dce4e0;
+	border-radius: 8px;
+	box-shadow: 0 18px 50px rgb(26 53 48 / 12%);
+	box-sizing: border-box;
+	max-width: 29rem;
+	padding: 2.5rem;
+	width: 100%;
+}
+
+.auth-brand {
+	align-items: center;
+	color: #153c37;
+	display: flex;
+	font-family: Georgia, serif;
+	font-size: 1.15rem;
+	font-weight: 700;
+	gap: 0.65rem;
+}
+
+.auth-brand-mark {
+	align-items: center;
+	background: #14756d;
+	border-radius: 6px;
+	color: #fff;
+	display: inline-flex;
+	font-family: Georgia, serif;
+	font-size: 1.25rem;
+	height: 2.25rem;
+	justify-content: center;
+	width: 2.25rem;
+}
+
+.auth-heading { margin: 2.1rem 0 1.8rem; }
+.auth-heading h1 { color: #163833; font-family: Georgia, serif; font-size: 2rem; font-weight: 700; letter-spacing: 0; margin: 0.3rem 0 0.55rem; }
+.auth-heading p { color: #62716d; line-height: 1.55; margin: 0; }
+.auth-eyebrow { color: #14756d !important; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
+
+.auth-form { display: grid; gap: 1.15rem; }
+.auth-field { display: grid; gap: 0.45rem; }
+.auth-field label { color: #314842; font-size: 0.9rem; font-weight: 600; }
+.auth-field .p-inputtext, .auth-field .p-password { box-sizing: border-box; width: 100%; }
+.auth-submit { justify-content: center; margin-top: 0.35rem; width: 100%; }
+.auth-footer { color: #62716d; font-size: 0.9rem; margin: 1.6rem 0 0; text-align: center; }
+.auth-footer a { color: #0d6961; font-weight: 700; text-decoration: none; }
+.auth-footer a:hover { text-decoration: underline; }
+
+@keyframes auth-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 480px) {
+	.auth-panel { padding: 2rem 1.4rem; }
+	.auth-heading h1 { font-size: 1.7rem; }
+}
+
+.app-shell {
+	display: grid;
+	grid-template-columns: 16rem minmax(0, 1fr);
+	min-height: 100vh;
+}
+
+.app-sidebar {
+	background: #163833;
+	box-sizing: border-box;
+	color: #eaf2ef;
+	display: flex;
+	flex-direction: column;
+	padding: 1.25rem;
+}
+
+.app-brand {
+	align-items: center;
+	color: #fff;
+	display: flex;
+	font-family: Georgia, serif;
+	font-size: 1.1rem;
+	font-weight: 700;
+	gap: 0.65rem;
+	padding: 0.4rem;
+	text-decoration: none;
+}
+
+.app-brand-mark {
+	align-items: center;
+	background: #e6b74a;
+	border-radius: 6px;
+	color: #173833;
+	display: inline-flex;
+	height: 2rem;
+	justify-content: center;
+	width: 2rem;
+}
+
+.app-navigation { display: grid; gap: 0.35rem; margin-top: 2.5rem; }
+.app-nav-item { align-items: center; border-radius: 6px; color: #c9d8d3; display: flex; font-size: 0.94rem; font-weight: 600; gap: 0.75rem; padding: 0.8rem; text-decoration: none; }
+.app-nav-item:hover, .app-nav-item.router-link-active { background: rgb(255 255 255 / 14%); color: #fff; }
+.app-sidebar-footer { border-top: 1px solid rgb(255 255 255 / 14%); margin-top: auto; padding-top: 1rem; }
+.app-user-name { color: #c9d8d3; font-size: 0.85rem; margin: 0 0 0.45rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-logout { color: #eaf2ef !important; justify-content: flex-start; padding-left: 0.75rem !important; width: 100%; }
+.app-content { background: #f5f7f5; box-sizing: border-box; padding: 2rem; }
+
+@media (max-width: 680px) {
+	.app-shell { grid-template-columns: 1fr; }
+	.app-sidebar { gap: 0.8rem; padding: 0.75rem 1rem; }
+	.app-navigation { display: flex; margin-top: 0; }
+	.app-sidebar-footer { border: 0; margin: 0 0 0 auto; padding: 0; }
+	.app-user-name { display: none; }
+	.app-nav-item span { display: none; }
+	.app-nav-item { padding: 0.6rem; }
+	.app-logout { width: auto; }
+	.app-logout .p-button-label { display: none; }
+	.app-content { padding: 1.25rem; }
+}

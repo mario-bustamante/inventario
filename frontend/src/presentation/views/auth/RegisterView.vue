@@ -5,17 +5,22 @@ import RegisterForm from '@/presentation/components/auth/RegisterForm.vue'
 </script>
 
 <template>
+    <main class="auth-page">
+        <section class="auth-panel">
+            <div class="auth-brand">
+                <span>Sistema de Inventario</span>
+            </div>
 
-    <div class="login-page">
-
-        <div class="login-card">
-
-            <h1>Registrar</h1>
+            <div class="auth-heading">
+                <h1>Crea tu cuenta</h1>
+            </div>
 
             <RegisterForm />
 
-        </div>
-
-    </div>
-
+            <p class="auth-footer">
+                ¿Ya tienes una cuenta?
+                <RouterLink :to="{ name: 'login' }">Iniciar sesión</RouterLink>
+            </p>
+        </section>
+    </main>
 </template>

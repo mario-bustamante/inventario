@@ -35,6 +35,6 @@ export class AuthRepositoryImpl implements AuthRepository {
 
     async logout(): Promise<void> {
 
-        await api.post('/logout')
+        await api.post('/auth/logout')
     }
 }

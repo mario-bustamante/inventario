@@ -65,59 +65,42 @@ async function submit() {
 
 <template>
 
-    <form
-        class="flex flex-column gap-4"
-        @submit.prevent="submit"
-    >
-
-        <div class="flex flex-column gap-2">
-
-            <label for="name">
-                Nombre
-            </label>
+    <form class="auth-form" @submit.prevent="submit">
+        <div class="auth-field">
+            <label for="name">Nombre completo</label>
 
             <InputText
                 id="name"
                 v-model="name"
                 autocomplete="name"
+                placeholder="Tu nombre"
             />
-
         </div>
 
-        <div class="flex flex-column gap-2">
-
-            <label for="email">
-                Email
-            </label>
+        <div class="auth-field">
+            <label for="email">Correo electrónico</label>
 
             <InputText
                 id="email"
                 v-model="email"
                 type="email"
                 autocomplete="email"
+                placeholder="nombre@empresa.com"
             />
-
         </div>
 
-        <div class="flex flex-column gap-2">
-
-            <label for="password">
-                Contraseña
-            </label>
+        <div class="auth-field">
+            <label for="password">Contraseña</label>
 
             <Password
                 id="password"
                 v-model="password"
                 toggleMask
             />
-
         </div>
 
-        <div class="flex flex-column gap-2">
-
-            <label for="passwordConfirmation">
-                Confirmar contraseña
-            </label>
+        <div class="auth-field">
+            <label for="passwordConfirmation">Confirmar contraseña</label>
 
             <Password
                 id="passwordConfirmation"
@@ -125,7 +108,6 @@ async function submit() {
                 :feedback="false"
                 toggleMask
             />
-
         </div>
 
         <Message
@@ -139,8 +121,8 @@ async function submit() {
             type="submit"
             label="Registrarse"
             :loading="authStore.loading"
+            class="auth-submit"
         />
-
     </form>
 
 </template>
