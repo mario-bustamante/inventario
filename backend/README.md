@@ -183,11 +183,11 @@ AUTH_COOKIE_SAME_SITE=none # Necesario si frontend y API operan en orígenes dis
 
 | Método | Ruta | Middleware | Descripción |
 |---|---|---|---|
-| `POST` | `/api/login` | `throttle:5,1` | Autenticar usuario |
-| `POST` | `/api/register` | `throttle:5,1` | Registrar usuario |
-| `POST` | `/api/refresh` | `throttle:5,1` | Rotar token JWT y renovar cookie HttpOnly |
-| `GET` | `/api/me` | `auth:api` | Usuario autenticado |
-| `POST` | `/api/logout` | `auth:api` | Revocar token y eliminar cookie |
+| `POST` | `/api/auth/login` | `throttle:5,1` | Autenticar usuario |
+| `POST` | `/api/auth/register` | `throttle:5,1` | Registrar usuario |
+| `POST` | `/api/auth/refresh` | `throttle:5,1` | Rotar token JWT y renovar cookie HttpOnly |
+| `GET` | `/api/auth/me` | `auth:api` | Usuario autenticado |
+| `POST` | `/api/auth/logout` | `auth:api` | Revocar token y eliminar cookie |
 
 ---
 
@@ -204,6 +204,70 @@ La respuesta de `login/register/refresh` entrega información de sesión y usuar
 ```
 
 El JWT viaja en la cookie HttpOnly `access_token`.
+
+---
+
+## Roles y permisos con Spatie
+
+El proyecto usa `spatie/laravel-permission` para administrar roles y permisos. Un usuario puede tener uno o varios roles; las relaciones se almacenan en la tabla polimórfica `model_has_roles`, por lo que la tabla `users` no requiere una columna `role_id`.
+
+### Instalación
+
+```bash
+composer require spatie/laravel-permission
+php artisan migrate
+```
+
+La migración `database/migrations/2026_08_28_000002_create_permission_tables.php` crea las tablas:
+
+```text
+roles
+permissions
+model_has_roles
+model_has_permissions
+role_has_permissions
+```
+
+El modelo `App\Models\User` utiliza el trait `HasRoles`, que habilita los métodos para consultar y asignar roles y permisos.
+
+### Crear y asignar roles
+
+Como la autenticación del proyecto usa el guard `api`, crea los roles y permisos con ese mismo guard:
+
+```php
+use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+$role = Role::findOrCreate('admin', 'api');
+$permission = Permission::findOrCreate('manage users', 'api');
+
+$role->givePermissionTo($permission);
+
+$user = User::findOrFail(1);
+$user->assignRole($role);
+```
+
+### Consultar autorizaciones
+
+```php
+$user->hasRole('admin');
+$user->hasAnyRole(['admin', 'manager']);
+$user->can('manage users');
+```
+
+Para proteger una ruta con permisos, utiliza el middleware de Spatie:
+
+```php
+Route::middleware(['auth:api', 'permission:manage users,api'])
+    ->get('/users', [UserController::class, 'index']);
+```
+
+Después de crear o cambiar roles y permisos mediante código, limpia la caché de permisos:
+
+```bash
+php artisan permission:cache-reset
+```
 
 ---
 
@@ -239,20 +303,3 @@ composer require laravel/boost --dev
 php artisan boost:install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

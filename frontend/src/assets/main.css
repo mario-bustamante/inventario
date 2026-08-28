@@ -163,6 +163,15 @@ body {
 .app-navigation { display: grid; gap: 0.35rem; margin-top: 2.5rem; }
 .app-nav-item { align-items: center; border-radius: 6px; color: #c9d8d3; display: flex; font-size: 0.94rem; font-weight: 600; gap: 0.75rem; padding: 0.8rem; text-decoration: none; }
 .app-nav-item:hover, .app-nav-item.router-link-active { background: rgb(255 255 255 / 14%); color: #fff; }
+.app-nav-heading { color: #8eaaa2; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; margin: 1.35rem 0 0.35rem; padding: 0 0.8rem; text-transform: uppercase; }
+.app-nav-group-trigger, .app-nav-placeholder { background: transparent; border: 0; cursor: pointer; font-family: inherit; text-align: left; width: 100%; }
+.app-nav-group-trigger:hover, .app-nav-placeholder:hover { background: rgb(255 255 255 / 14%); color: #fff; }
+.app-nav-chevron { font-size: 0.75rem; margin-left: auto; transition: transform 160ms ease-out; }
+.app-nav-chevron.is-open { transform: rotate(180deg); }
+.app-nav-submenu { display: grid; gap: 0.1rem; margin: 0.2rem 0 0.35rem; padding-left: 1.2rem; }
+.app-nav-subitem { align-items: center; background: transparent; border: 0; border-radius: 5px; color: #aac0b9; cursor: pointer; display: flex; font-family: inherit; font-size: 0.84rem; gap: 0.7rem; padding: 0.55rem 0.75rem; text-align: left; width: 100%; }
+.app-nav-subitem i { font-size: 0.35rem; }
+.app-nav-subitem:hover { background: rgb(255 255 255 / 10%); color: #fff; }
 .app-nav-action.p-button { align-items: center; background: rgb(255 255 255 / 14%) !important; border: 0 !important; box-shadow: none !important; color: #ffd8d8 !important; cursor: pointer; display: flex !important; font-family: inherit !important; font-size: 0.94rem !important; font-weight: 600 !important; gap: 0.75rem; justify-content: flex-start !important; margin: 0; padding: 0.8rem !important; text-align: left; width: 100%; }
 .app-nav-action.p-button:hover { background: #b83236 !important; color: #fff !important; }
 .app-nav-action.p-button .p-button-icon, .app-nav-action.p-button .p-button-label { color: inherit; font-size: inherit; font-weight: inherit; margin: 0; }
