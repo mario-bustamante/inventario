@@ -33,6 +33,12 @@ const router = createRouter({
                     name: 'dashboard',
                     component: () =>
                         import('@/presentation/views/DashboardView.vue')
+                },
+                {
+                    path: 'role-permissions',
+                    name: 'role-permissions',
+                    component: () =>
+                        import('@/presentation/views/role-permissions/RoleView.vue')
                 }
             ]
         },
